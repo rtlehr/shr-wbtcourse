@@ -1,0 +1,24 @@
+// ------------------------------------------
+//  Global Sass Entry Point
+// ------------------------------------------
+
+@use "sass:color";
+
+// Imports
+@import 'utils/variables';
+@import 'utils/mixins';
+@import 'utils/base';
+@import 'utils/layout';
+@import 'utils/components';
+@import 'utils/breakpoints';
+
+/* ===== Base (leaned down to only what's used) ===== */
+
+@import 'interface';
+@import 'animation';
+@import 'devMenu';
+@import 'modal';
+@import 'parallax';
+@import 'quizManager';
+
+

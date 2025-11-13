@@ -1,0 +1,113 @@
+<meta name="wbt-init" content="Lesson1Init">
+
+<style></style>
+
+<section class="pageContent" aria-labelledby="l1-title">
+  <h1 id="l1-title">Parallax - Mod 2 Page 1</h1>
+
+  <div id="type"
+     class="animateMe typewriter"
+     data-duration="5"
+     data-cps="15"
+     data-beginSound="typewriterkeys"
+     data-endSound="typewriterbell" 
+     style="height: 100px;">
+    <p>Welcome to the Parallax example page. In this example we have a parallax scene with multiple layers moving at different speeds to create a sense of depth. Additionally, we have animated elements such as a running character and a flying bird to enhance the visual experience.</p>
+  </div>
+
+  <p>&nbsp;</p>
+
+  <div id="hero" class="parallax-scene" style="width: 1300px; height: 500px;">
+    <img id="Layer_0"  src="content/images/paralax/PNG/layer_0.png" class="parallax-layer" style="width: 2600;"/>
+    <img id="Layer_1" src="content/images/paralax/PNG/layer_1.png" class="parallax-layer" style="width: 2600;"/>
+    <img id="Layer_2" src="content/images/paralax/PNG/layer_2.png" class="parallax-layer" style="width: 2600;"/>
+
+    <div id="birdAnimate" data-duration="20" class="animateMe slideRight parallaxExclude" style="left: 300px; top:25px; width: 123px; height: 130px;">
+      <div id="bird" style="width:300px; height:300px;"></div>
+    </div>
+
+    <div id="runnerAnimate" data-duration="10" data-endFunction="stopRunner" class="animateMe slideRight parallaxExclude" style="left: 0px; top:50px; width: 300px; height: 300px;">
+      <div id="runner" style="width:300px; height:300px;"></div>
+    </div>
+
+    <img id="Layer_3" src="content/images/paralax/PNG/layer_3.png" class="parallax-layer" style="width: 2600;"/>
+  </div>
+
+  </section>
+
+<!-- MODAL WINDOW -->
+<div id="pageTemplate-dialog" title="Basic dialog" style="display: none;">
+  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+</div>
+
+<!-- one reusable dialog -->
+<div id="tipDialog" title="Info" style="display:none;">
+  <div class="tip-body"></div>
+</div>
+
+<script>
+
+  function pageLoadedFunction() {
+    
+    console.log("pageLoadedFunction function called");
+
+  }
+
+  async function finishedMovingIn() {
+    
+    console.log("finishedMovingIn function called");
+
+    
+    const par = new Parallax({
+      parent: "#hero",
+      duration: 10,
+      distance: [0.15,0.25,0.5,1],
+      imageWidths: [2600, 2600, 2600, 2600]
+    });
+
+     window.cssAnim = new SpriteSheet({
+      src: 'content/images/runner/runner2.png',
+      frameWidth: 300,
+      frameHeight: 300,
+      fps: 6,
+      mode: 'css'
+    });
+
+     window.bird = new SpriteSheet({
+      src: 'content/images/bird/bird.png',
+      frameWidth: 123,
+      frameHeight: 130,
+      fps: 6,
+      mode: 'css'
+    });
+
+    await window.cssAnim.init('#runner');
+
+    await window.bird.init('#bird');
+
+    window.cssAnim.setRange(4,6);
+
+    window.bird.setRange(0,7);
+
+    window.cssAnim.play();
+
+     window.bird.play();
+
+    course.playAnimation("#runnerAnimate");
+
+    course.playAnimation("#birdAnimate");
+
+    course.playAnimation("#type");
+
+
+  }
+
+
+  async function stopRunner()
+  {
+    window.cssAnim.pause();           
+    window.cssAnim.setRange(0, window.cssAnim.totalFrames - 1, { snap: false });
+    window.cssAnim.gotoFrame(0); 
+  }
+
+</script>

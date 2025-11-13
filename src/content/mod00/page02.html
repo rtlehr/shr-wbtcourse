@@ -1,0 +1,87 @@
+<meta name="wbt-init" content="Lesson1Init">
+
+<style></style>
+
+<section class="pageContent" aria-labelledby="l1-title">
+  <h1 id="l1-title">Mod 1 Page 2</h1>
+  <p>Should be a sound playing</p>
+  <p><a id="pageTemplate" class="modalWindow" href="#" data-width="400" data-height="200">Click to show modal window</a></p>
+  <p><a href="#" class="has-tip" data-tip="This is a tool tip.">Tool Tip</a></p>
+
+  <div id="zoomMe" class="animateMe zoom fadeOut"
+     data-zoom="2"
+     data-horizontalAnchor="center"
+     data-verticleAnchor="bottom"
+     data-duration="0.8"
+     data-delay="0.2"
+     data-endFunction="zoomedIn"
+     style="background-color: aqua; width: 200px;">
+  Zoom me from 100% → 175% anchored at bottom-right
+</div>
+
+  <div id="runnerAnimate" data-duration="2.5" data-endFunction="stopRunner" class="animateMe slideRight" style="left: 0px; width: 300px; height: 300px;">
+    <div id="runner" style="width:300px; height:300px;"></div>
+  </div>
+
+  </section>
+
+<!-- MODAL WINDOW -->
+<div id="pageTemplate-dialog" title="Basic dialog" style="display: none;">
+  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+</div>
+
+<!-- one reusable dialog -->
+<div id="tipDialog" title="Info" style="display:none;">
+  <div class="tip-body"></div>
+</div>
+
+<script>
+
+  if (window.cssAnim) {
+    window.cssAnim = null;
+  }
+
+  function pageLoadedFunction() {
+    
+    console.log("pageLoadedFunction function called");
+
+  }
+
+  async function finishedMovingIn() {
+
+    console.log("finishedMovingIn function called");
+
+    console.log("window.cssAnim2 " + window.cssAnim);
+
+    window.cssAnim = new SpriteSheet({
+      src: 'content/images/runner/runner2.png',
+      frameWidth: 300,
+      frameHeight: 300,
+      fps: 6,
+      mode: 'css'
+    });
+
+    await window.cssAnim.init('#runner');
+
+    window.cssAnim.setRange(4,6);
+
+    window.cssAnim.play();
+
+    course.playAnimation("#runnerAnimate");
+
+    course.playAnimation("#zoomMe");
+
+  }
+
+  async function stopRunner()
+  {
+    window.cssAnim.pause();           
+    window.cssAnim.setRange(0, window.cssAnim.totalFrames - 1, { snap: false });
+    window.cssAnim.gotoFrame(0); 
+  }
+
+  function zoomedIn()
+  {
+    console.log("zoomedIn function called");
+  }
+</script>

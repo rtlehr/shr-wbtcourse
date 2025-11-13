@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>QuizManager Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- Your compiled CSS that includes quiz.scss -->
+  <link rel="stylesheet" href="core/css/core.css" />
+  <link rel="stylesheet" href="custom/css/custom.css" />
+</head>
+<body>
+
+  <main class="container">
+
+    <!-- Single-correct question (radios) -->
+    <section class="wbt-quiz" data-question-id="q1">
+      <div class="quiz-question">
+        1. Which of the following is a JavaScript library?
+      </div>
+      <ul class="quiz-options">
+        <li class="quiz-option" data-correct="false">CSS</li>
+        <li class="quiz-option" data-correct="true">jQuery</li>   
+        <li class="quiz-option" data-correct="false">HTML</li>
+        <li class="quiz-option" data-correct="false">PNG</li>
+      </ul>
+
+      <!-- Optional feedback text blocks -->
+      <div class="quiz-feedback quiz-feedback-correct">
+        Correct: jQuery is the only JavaScript library in this list.
+      </div>
+      <div class="quiz-feedback quiz-feedback-incorrect">
+        Not quite. Remember, a JavaScript library is code written in JS that you can reuse.
+      </div>
+
+      <button type="button" class="quiz-submit">Check answer</button>
+    </section>
+
+    <!-- Multiple-correct question (checkboxes) -->
+    <section class="wbt-quiz" data-question-id="q2">
+      <div class="quiz-question">
+        2. Which of the following are front-end technologies? (Select all that apply.)
+      </div>
+      <ul class="quiz-options">
+        <li class="quiz-option" data-correct="true">HTML</li>
+        <li class="quiz-option" data-correct="true">CSS</li>
+        <li class="quiz-option" data-correct="true">JavaScript</li>
+        <li class="quiz-option" data-correct="false">SQL</li>
+      </ul>
+
+      <div class="quiz-feedback quiz-feedback-correct">
+        Correct: HTML, CSS, and JavaScript are all used on the front end.
+      </div>
+      <div class="quiz-feedback quiz-feedback-incorrect">
+        Check again. Think about which technologies run in the browser.
+      </div>
+
+      <button type="button" class="quiz-submit">Check answer</button>
+    </section>
+
+  </main>
+
+  <script src="core/js/core.js"></script>
+    <script src="custom/js/custom.js"></script>
+    
+  <script>
+    // Paste or include the QuizManager class file before this
+
+    $(document).ready(function () {
+      const quizMgr = new QuizManager(/* course or null */);
+      quizMgr.init();
+    });
+  </script>
+</body>
+</html>

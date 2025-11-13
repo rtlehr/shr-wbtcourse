@@ -1,0 +1,266 @@
+/* =========================================
+   interface.scss — Refactor (same behavior)
+   ========================================= */
+
+/* ------------------------------
+   Base / Typography / Links
+------------------------------ */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  background: url("../../content/images/courseBackground.jpg") top left / cover no-repeat;
+  color: #212529;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+a:hover { color: #0a58ca; }
+
+/* ------------------------------
+   Course Window & Content
+------------------------------ */
+#courseWindow {
+  background: #fff;
+  /* border: 1px solid #e5e7eb; */
+  border-radius: 8px;
+  box-shadow: 10px 10px 15px rgba(0,0,0,.3);
+  height: $courseWindow-height;
+  width: $courseWindow-width;
+  overflow: hidden;
+
+  @include respond-tablet {}
+
+  @include respond-phone {
+    width: 100%;
+    /* background-color: yellow; */
+    border-radius: 0;
+    box-shadow: none;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible;
+    position: absolute;
+    top: 0px;
+  }
+}
+
+#courseContent {
+  width: 100%;
+  height: $courseWindow-height - 50px;
+
+  @include respond-tablet {}
+
+  @include respond-phone {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible;
+  }
+}
+
+/* ------------------------------
+   Page Navigation Buttons (round)
+------------------------------ */
+.coursePageNavigation {
+  width: 80px;
+  height: 80px;
+  border: 3px solid $brand-color;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: $brand-color;
+  background: $color1;
+}
+.coursePageNavigation:hover {
+  background: $brand-color;
+  color: #fff;
+  transform: scale(1.05);
+}
+.coursePageNavigation .arrow-icon {
+  width: 40px;
+  height: 40px;
+}
+
+/* Position tweaks for prev/next buttons */
+#previousButton {
+  position: relative;
+  left: 45px;
+  z-index: 100;
+}
+#nextButton {
+  position: relative;
+  left: -43px;
+  z-index: 100;
+}
+
+/* ------------------------------
+   Content Holders / Sliding Row
+------------------------------ */
+#wbtContentRow {
+  position: relative;
+  left: 0 - $courseWindow-width;
+  height: $courseWindow-height - 50px;
+  width: $courseWindow-width * 3;
+  margin-left: 0;
+  margin-right: 0;
+
+  @include respond-tablet {}
+
+  @include respond-phone {
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible;
+    /* background-color: purple; */
+  }
+}
+
+/* Individual page panes */
+#previousPage,
+#currentPage,
+#nextPage {
+  height: $courseWindow-height;
+  padding: 0;
+  margin: 0;
+
+  @include respond-tablet {}
+}
+
+/* Phone overrides for panes */
+@include respond-phone {
+  #previousPage { display: none; }       /* was missing semicolon */
+  #nextPage     { display: none; }       /* was missing semicolon */
+
+  #currentPage {
+    display: block;
+    float: none;                         /* override Bootstrap 3 floats if any */
+    width: 100% !important;
+    height: auto !important;
+    /* background-color: lightblue; */
+  }
+}
+
+/* ------------------------------
+   Footer Bar
+------------------------------ */
+#courseFooter {
+  height: 50px;
+  line-height: 50px;      /* vertical align single-line text */
+  padding: 0 15px;
+  overflow: hidden;       /* keeps text inside the bar */
+  position: relative;
+  top: 0px;
+  padding-top: 13px;
+  background-color: #e5f3f9;
+
+  @include respond-tablet {}
+
+  @include respond-phone {
+    height: 100px;
+    padding-top: 0px;
+  }
+}
+
+/* Reset nested line-height if needed inside footer columns */
+#courseFooter .row > [class*="col-"] > * {
+  line-height: normal;
+}
+
+/* Footer column alignment */
+#leftCourseFooter,
+#centerCourseFooter,
+#rightCourseFooter {
+  text-align: center;
+}
+
+/* ------------------------------
+   Module/Page State & Menu
+------------------------------ */
+.activeModule {
+  font-weight: 600;
+  background-color: $color1;
+  color: white !important;
+}
+
+/* Disabled module (LI) cursor + link blocking */
+.notAvailableModule { cursor: not-allowed; }
+.notAvailableModule > a {
+  pointer-events: none;   
+  color: #999;
+  opacity: .6;
+  text-decoration: none;
+}
+
+/* Disabled page links */
+.notAvailablePage {
+  pointer-events: none;
+  opacity: .4;
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+/* Page number (top-right of navbar area) */
+#pageNumber {
+  color: #777;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  text-align: right;
+}
+
+/* ------------------------------
+   jQuery UI Tooltip Skin
+------------------------------ */
+.ui-tooltip,
+.arrow:after {
+  background: black;
+  border: 2px solid white;
+}
+
+.ui-tooltip {
+  padding: 10px 20px;
+  color: white;
+  border-radius: 20px;
+  font: bold 14px "Helvetica Neue", Sans-Serif;
+  text-transform: uppercase;
+  box-shadow: 0 0 7px black;
+}
+
+.arrow {
+  width: 70px;
+  height: 16px;
+  overflow: hidden;
+  position: absolute;
+  left: 50%;
+  margin-left: -35px;
+  bottom: -16px;
+}
+.arrow.top {
+  top: -16px;
+  bottom: auto;
+}
+.arrow.left { left: 20%; }
+.arrow:after {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: -20px;
+  width: 25px;
+  height: 25px;
+  box-shadow: 6px 5px 9px -9px black;
+  transform: rotate(45deg);
+}
+.arrow.top:after {
+  bottom: -20px;
+  top: auto;
+}

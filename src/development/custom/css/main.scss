@@ -1,0 +1,12 @@
+@use "sass:color";
+
+// Imports
+@import '../../core/css/utils/variables';
+@import '../../core/css/utils/mixins';
+@import '../../core/css/utils/breakpoints';
+
+@import 'interface';
+@import 'page';
+@import 'skiplinks';
+
+
