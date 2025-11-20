@@ -1,638 +1,620 @@
 class Animation {
 
-	constructor(course, pageInfo) {
-		this.course = course;
-
-		// ACCESSIBILITY: detect prefers-reduced-motion once
-		this.reduceMotion = window.matchMedia &&
-			window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	}
-
-	init() {
-		console.log("Animation Initialized");
-
-		// Safety net: cancel animations (and stop begin sounds) when page is hidden/unloaded
-		window.addEventListener('pagehide', () => {
-			$('.animateMe').each((_, node) => this._cancelAnim($(node), { stopSounds: true }));
-		});
-	}
-
-	// --- Helpers (A11y + utils) ---------------------------------------------
-	_focusableSelector() {
-		return [
-			'a[href]',
-			'area[href]',
-			'button:not([disabled])',
-			'input:not([disabled])',
-			'select:not([disabled])',
-			'textarea:not([disabled])',
-			'iframe',
-			'audio[controls]',
-			'video[controls]',
-			'[contenteditable]',
-			'[tabindex]'
-		].join(',');
-	}
-
-	// Mark/unmark aria-hidden and manage tabindex on the element & descendants
-	_setHiddenForA11y($el, hidden) {
-		if (hidden) {
-			// store original tabindex on self (if any)
-			if (!$el.data('_prevTabindex')) {
-				const prev = $el.attr('tabindex');
-				if (prev != null) $el.data('_prevTabindex', prev);
-			}
-			$el.attr('aria-hidden', 'true').attr('tabindex', '-1');
-
-			// store/disable descendants
-			$el.find(this._focusableSelector()).each(function () {
-				const $c = $(this);
-				if (!$c.data('_prevTabindex')) {
-					const prev = $c.attr('tabindex');
-					if (prev != null) $c.data('_prevTabindex', prev);
-				}
-				$c.attr('tabindex', '-1');
-			});
-		} else {
-			$el.removeAttr('aria-hidden');
-
-			// restore self tabindex if we had one; otherwise remove
-			const prev = $el.data('_prevTabindex');
-			if (prev != null) {
-				$el.attr('tabindex', String(prev));
-			} else {
-				$el.removeAttr('tabindex');
-			}
-			$el.removeData('_prevTabindex');
-
-			// restore descendants
-			$el.find(this._focusableSelector()).each(function () {
-				const $c = $(this);
-				const p = $c.data('_prevTabindex');
-				if (p != null) {
-					$c.attr('tabindex', String(p));
-				} else {
-					$c.removeAttr('tabindex');
-				}
-				$c.removeData('_prevTabindex');
-			});
-		}
-	}
-	// -------------------------------------------------------------------------
-
-	setUpAnimation() {
-		const self = this;
-
-		if (mqPhone.matches) {
-			return;
-		}
-
-		$(".animateMe").each(function () {
-			let eWidth = $(this).width();
-			let eHeight = $(this).height();
-			let eTop = $(this).offset().top;
-			let eLeft = $(this).offset().left;
-
-			let cW = $(this).attr("data-animationPane") || "#courseWindow";
-
-			let wHeight = $(cW).height();
-			let wWidth = $(cW).width();
-			let wTop = $(cW).offset().top;
-			let wLeft = $(cW).offset().left;
-
-			let newTop = 0;
-			let newLeft = 0;
-
-			let goToTop = 0;
-			let goToLeft = 0;
-			let goToOpacity = 1;
-
-			// slideInBottom
-			if ($(this).hasClass("slideInBottom")) {
-				newTop = (wHeight - (eTop - wTop));
-			}
-			// slideInRight
-			if ($(this).hasClass("slideInRight")) {
-				newLeft = (wWidth - (eLeft - wLeft));
-			}
-			// slideInTop
-			if ($(this).hasClass("slideInTop")) {
-				newTop = 0 - ((eTop - wTop) + eHeight);
-			}
-			// slideInLeft
-			if ($(this).hasClass("slideInLeft")) {
-				newLeft = 0 - ((eLeft - wLeft) + eWidth);
-			}
-
-			// slideRight
-			if ($(this).hasClass("slideRight")) {
-				goToLeft = wWidth - eWidth;
-			}
-			// slideLeft
-			if ($(this).hasClass("slideLeft")) {
-				goToLeft = 0 - (wWidth - eWidth);
-			}
-			// slideBottom
-			if ($(this).hasClass("slideBottom")) {
-				goToTop = wHeight - eHeight;
-			}
-			// slideTop
-			if ($(this).hasClass("slideTop")) {
-				goToTop = 0 - (wHeight - eHeight);
-			}
-
-			// slideOutLeft
-			if ($(this).hasClass("slideOutLeft")) {
-				newLeft = 0;
-				goToLeft = 0 - ((eLeft - wLeft) + eWidth);
-			}
-			// slideOutRight
-			if ($(this).hasClass("slideOutRight")) {
-				newLeft = 0;
-				goToLeft = (wWidth - (eLeft - wLeft));
-			}
-			// slideOutTop
-			if ($(this).hasClass("slideOutTop")) {
-				newTop = 0;
-				goToTop = 0 - ((eTop - wTop) + eHeight);
-			}
-			// slideOutBottom
-			if ($(this).hasClass("slideOutBottom")) {
-				newTop = 0;
-				goToTop = (wHeight - (eTop - wTop));
-			}
-
-			// fadeIn
-			if ($(this).hasClass("fadeIn")) {
-				$(this).css("opacity", 0);
-			}
-			// fadeOut
-			if ($(this).hasClass("fadeOut")) {
-				goToOpacity = 0;
-			}
-
-			if (newTop != 0) {
-				$(this).css("top", newTop);
-				if (newTop < 0) {
-					goToTop = Math.abs(newTop);
-				} else {
-					goToTop = 0 - newTop;
-				}
-			}
-
-			if (newLeft != 0) {
-				$(this).css("left", newLeft);
-				if (newLeft < 0) {
-					goToLeft = Math.abs(newLeft);
-				} else {
-					goToLeft = 0 - newLeft;
-				}
-			}
-
-			const rawZoom = $(this).data('zoom');
-			const hasZoomClass = $(this).hasClass('zoom');
-			const scaleTarget = Number.isFinite(rawZoom) ? Number(rawZoom) : null;
-
-			// Use new per-axis attributes (with legacy fallback)
-			const anchor = self._readAnchor($(this));
-			$(this).css('transform-origin', anchor);
-
-			const cfg = {
-				left: goToLeft,
-				top: goToTop,
-				opacity: goToOpacity,
-				duration: $(this).data('duration') ?? 1,
-				delay: $(this).data('delay') ?? 0
-			};
-
-			if (hasZoomClass || scaleTarget != null) {
-				cfg.scale = (scaleTarget != null) ? scaleTarget : 1;
-				cfg.anchor = anchor; // store for playAnimation()
-			}
-
-			// TYPEWRITER: prep the node (store full text; create visual span)
-			if ($(this).hasClass('typewriter')) {
-				const full = $(this).text();
-				$(this)
-					.attr('aria-label', full)
-					.attr('aria-live', 'off') // avoid SR spam during typing
-					.empty()
-					.append('<span class="tw-txt" aria-hidden="true"></span>')
-					.attr('data-tw-full', full);
-			}
-
-			$(this).attr('data-animation', JSON.stringify(cfg));
-
-			// Always last line
-			$(this).css("visibility", "visible");
-		});
-	}
-
-	playAnimation(target) {
-
-		if (mqPhone.matches) {
-			return;
-		}
-
-		const $el = (typeof target === 'string') ? $(target).first() : $(target);
-		if (!$el || !$el.length) return;
-
-		const cfg = this.parseAnimationJSON($el);
-
-		// Defaults
-		const left = Number(cfg.left || 0);
-		const top = Number(cfg.top || 0);
-		const opacity = (cfg.opacity == null) ? null : Number(cfg.opacity);
-		const duration = Number(cfg.duration || 0.6);
-		const delay = Number(cfg.delay || 0);
-		const easing = cfg.easing || 'linear';
-		const isTypewriter = $el.hasClass('typewriter');
-
-		// NEW: Zoom parameters
-		const hasZoom = (cfg.scale != null);
-		const scaleTarget = hasZoom ? Number(cfg.scale) : 1;
-		const transformOrigin = cfg.anchor || this._readAnchor($el); // fallback if needed
-		$el.css('transform-origin', transformOrigin);
-
-		// Callbacks & chaining
-		const startFnName = $el.attr('data-startFunction');
-		const endFnName = $el.attr('data-endFunction');
-		const chain = $el.attr('data-chain') || null;
-		const startFn = (startFnName && window[startFnName]) || null;
-		const endFn = (endFnName && window[endFnName]) || null;
-
-		const beginSound = $el.attr('data-beginSound');
-		const endSound = $el.attr('data-endSound');
-
-		// ACCESSIBILITY: if we’re going to show (opacity > 0), make it visible and restore focusability
-		if (opacity == null || opacity > 0) {
-			$el.css('visibility', 'visible');
-			this._setHiddenForA11y($el, false);
-		}
-
-		// mark this run as the active animation instance for this element
-		const startToken = this._markAnimStart($el);
-
-		// Begin sound (no adapter here—uses your course API)
-		if (beginSound != undefined) {
-			try { course.playSound(beginSound); } catch (e) {}
-		}
-
-		// Respect reduce motion: jump to end state, still honor callbacks/chain
-		if (this.reduceMotion) {
-			if (typeof startFn === 'function') startFn($el[0]);
-
-			// For typewriter: instantly reveal full text
-			if (isTypewriter) {
-				const span = $el.find('.tw-txt');
-				const full = $el.attr('data-tw-full') || '';
-				if (span.length) span.text(full);
-				else $el.text(full);
-			}
-
-			// immediate final state (no transform timing here)
-			const transformFinal = this._composeTransform(left, top, scaleTarget);
-			$el.css('transform-origin', transformOrigin);
-			$el.css('transform', transformFinal);
-			if (opacity != null) $el.css('opacity', String(opacity));
-
-			// A11y when hidden at end
-			if (opacity === 0) {
-				$el.css('visibility', 'hidden');
-				this._setHiddenForA11y($el, true);
-			}
-
-			if (typeof endFn === 'function') endFn($el[0]);
-
-			// Only play endSound if still valid
-			if (this._shouldStillPlay($el, startToken) && endSound != undefined) {
-				try {
-					if (beginSound != undefined) course.stopSound(beginSound);
-				} catch (e) {}
-				try { course.playSound(endSound); } catch (e) {}
-			}
-
-			if (chain && this._shouldStillPlay($el, startToken)) this.playAnimation(chain);
-
-			// clear any guards for safety (none set in reduced motion, but keeps state clean)
-			this._cancelAnim($el);
-			return;
-		}
-
-		// ------- TYPEWRITER BRANCH -----------------------------------------
-		if (isTypewriter) {
-			if (typeof startFn === 'function') startFn($el[0]);
-
-			// Optional opacity tween in parallel (no transform for typewriter)
-			if (opacity != null) {
-				$el.css({
-					transitionProperty: 'opacity',
-					transitionDuration: duration + 's',
-					transitionTimingFunction: easing,
-					transitionDelay: delay + 's',
-					willChange: 'opacity'
-				});
-				// Force reflow then apply target opacity
-				void $el[0].offsetWidth;
-				$el.css('opacity', String(opacity));
-			}
-
-			// Run typing
-			this._runTypewriter($el, this._getTypingOptions($el, duration, delay)).then(() => {
-				// Cleanup transition styles
-				$el.css({
-					transitionProperty: '',
-					transitionDuration: '',
-					transitionTimingFunction: '',
-					transitionDelay: '',
-					willChange: ''
-				});
-
-				if (opacity === 0) {
-					$el.css('visibility', 'hidden');
-					this._setHiddenForA11y($el, true);
-				}
-
-				if (!this._shouldStillPlay($el, startToken)) {
-					this._cancelAnim($el);
-					return;
-				}
-
-				if (typeof endFn === 'function') endFn($el[0]);
-
-				if (endSound != undefined) {
-					try {
-						if (beginSound != undefined) course.stopSound(beginSound);
-					} catch (e) {}
-					try { course.playSound(endSound); } catch (e) {}
-				}
-
-				if (chain) this.playAnimation(chain);
-
-				this._cancelAnim($el);
-			});
-
-			return; // IMPORTANT: skip the transform-based flow below
-		}
-		// -------------------------------------------------------------------
-
-		// Build transition CSS (non-typewriter path)
-		const props = (opacity == null) ? 'transform' : 'transform, opacity';
-		$el.css({
-			transitionProperty: props,
-			transitionDuration: duration + 's',
-			transitionTimingFunction: easing,
-			transitionDelay: delay + 's',
-			willChange: 'transform, opacity'
-		});
-
-		// Ensure the requested transform origin is used for scaling
-		$el.css('transform-origin', transformOrigin);
-
-		if (typeof startFn === 'function') startFn($el[0]);
-
-		// Force reflow
-		void $el[0].offsetWidth;
-
-		// Apply final state (translate + optional scale)
-		const transformFinal = this._composeTransform(left, top, scaleTarget);
-		$el.css('transform', transformFinal);
-		if (opacity != null) $el.css('opacity', String(opacity));
-
-		// Fallback guard if transitionend never fires
-		const total = (delay + duration) * 1000 + 50;
-		const guard = setTimeout(() => {
-			// Only synthesize if still valid
-			if (this._shouldStillPlay($el, startToken)) {
-				$el.trigger('transitionend');
-			}
-		}, total);
-		this._setGuardTimer($el, guard);
-
-		// End handler (namespaced)
-		const onEnd = (ev) => {
-			if (ev && ev.originalEvent && !/^(transform|opacity)$/.test(ev.originalEvent.propertyName)) return;
-
-			clearTimeout(guard);
-			$el.off('transitionend.anim', onEnd);
-
-			// Cleanup transition styles (keep transform-origin intact)
-			$el.css({
-				transitionProperty: '',
-				transitionDuration: '',
-				transitionTimingFunction: '',
-				transitionDelay: '',
-				willChange: ''
-			});
-
-			// A11y when hidden at end
-			if (opacity === 0) {
-				$el.css('visibility', 'hidden');
-				this._setHiddenForA11y($el, true);
-			}
-
-			// If this completion is stale (navigated away, element removed, etc.), stop here
-			if (!this._shouldStillPlay($el, startToken)) {
-				this._cancelAnim($el);
-				return;
-			}
-
-			if (typeof endFn === 'function') endFn($el[0]);
-
-			if (endSound != undefined) {
-				try {
-					if (beginSound != undefined) course.stopSound(beginSound);
-				} catch (e) {}
-				try { course.playSound(endSound); } catch (e) {}
-			}
-
-			if (chain) {
-				this.playAnimation(chain);
-			}
-
-			this._cancelAnim($el);
-		};
-
-		$el.one('transitionend.anim', onEnd);
-	}
-
-	parseAnimationJSON($el) {
-		let raw = $el.attr('data-animation');
-		if (!raw) return {};
-
-		raw = raw
-			.replace(/&quot;/g, '"')
-			.replace(/[“”]/g, '"')
-			.replace(/[‘’]/g, "'")
-			.trim();
-
-		if (raw.indexOf(';') !== -1) {
-			raw = raw.replace(/;\s*(?=")/g, ',');
-		}
-
-		try {
-			return JSON.parse(raw);
-		} catch (e) {
-			console.error('Invalid data-animation JSON after normalization:', raw, e);
-			return {};
-		}
-	}
-
-	// Resolve "Foo.bar.baz" to window.Foo.bar.baz if it’s a function
-	_resolveFn(path) {
-		if (!path) return null;
-		let ctx = window;
-		for (const part of String(path).split('.')) {
-			ctx = (ctx && ctx[part]) || null;
-			if (ctx == null) return null;
-		}
-		return (typeof ctx === 'function') ? ctx : null;
-	}
-
-	// === Typewriter helpers ===================================================
-
-	// Run the typewriter effect. Returns a Promise that resolves when typing finishes.
-	_runTypewriter($el, opts) {
-		// opts: { duration, delay, cps } — cps (chars/sec) optional; overrides duration logic
-		return new Promise((resolve) => {
-			const span = $el.find('.tw-txt').get(0);
-			const full = String($el.attr('data-tw-full') || '');
-			if (!span || !full.length) {
-				// nothing to type
-				if (span) span.textContent = full;
-				return resolve();
-			}
-
-			// Reduced motion: show full text and exit
-			if (this.reduceMotion) {
-				span.textContent = full;
-				return resolve();
-			}
-
-			const delayMs = Math.max(0, (opts.delay ?? 0) * 1000);
-			const cps = Number(opts.cps);
-			const durationMs = (cps && cps > 0)
-				? Math.ceil((full.length / cps) * 1000)
-				: Math.max(50, (opts.duration ?? 1) * 1000);
-
-			const stepMs = Math.max(8, Math.floor(durationMs / Math.max(1, full.length)));
-			let i = 0;
-
-			const start = () => {
-				const tick = () => {
-					// reveal next char
-					const end = Math.min(full.length, i + 1);
-					span.textContent = full.slice(0, end);
-					i = end;
-
-					if (i >= full.length) return resolve();
-					typingId = setTimeout(tick, stepMs);
-				};
-				tick();
-			};
-
-			let typingId = null;
-			setTimeout(start, delayMs);
-		});
-	}
-
-	// Compute typing options, allowing optional data-cps to override duration
-	_getTypingOptions($el, duration, delay) {
-		const cps = Number($el.data('cps'));
-		return { duration, delay, cps: Number.isFinite(cps) ? cps : null };
-	}
-
-	// === Transform helpers ====================================================
-
-	// Compose transform string. IMPORTANT ORDER:
-	// We apply scale FIRST so the translate distances are not scaled.
-	_composeTransform(leftPx, topPx, scaleVal) {
-		const s = Number.isFinite(scaleVal) ? scaleVal : 1;
-		const x = Number.isFinite(leftPx) ? leftPx : 0;
-		const y = Number.isFinite(topPx) ? topPx : 0;
-		// scale then translate (translate applied after scale)
-		return `scale(${s}) translate(${x}px, ${y}px)`;
-	}
-
-	// Map per-axis anchors to a CSS transform-origin string.
-	// Accepts data-horizontalAnchor: left|center|right
-	// and data-verticleAnchor / data-verticalAnchor: top|center|bottom
-	_readAnchor($el) {
-		// Back-compat single attribute (data-anchor) if both per-axis are missing
-		const legacy = String($el.data('anchor') ?? '').toLowerCase().trim();
-
-		// Per-axis (preferred)
-		let hx = String($el.data('horizontalanchor') ?? '').toLowerCase().trim();
-		// Support both "verticle" (as requested) and "vertical" (common spelling)
-		let vy = String(
-			($el.data('verticleanchor') ?? $el.data('verticalanchor') ?? '')
-		).toLowerCase().trim();
-
-		// If neither per-axis provided, try to parse legacy combined anchor
-		if (!hx && !vy && legacy) {
-			switch (legacy) {
-				case 'left-top':
-				case 'top-left': return '0% 0%';
-				case 'right-top':
-				case 'top-right': return '100% 0%';
-				case 'left-bottom':
-				case 'bottom-left': return '0% 100%';
-				case 'right-bottom':
-				case 'bottom-right': return '100% 100%';
-				case 'center':
-				default: return '50% 50%';
-			}
-		}
-
-		// Normalize per-axis values
-		const mapX = { left: '0%', center: '50%', right: '100%' };
-		const mapY = { top: '0%', center: '50%', bottom: '100%' };
-
-		const x = mapX[hx] ?? '50%';
-		const y = mapY[vy] ?? '50%';
-
-		return `${x} ${y}`;
-	}
-
-	// === Animation cancel/guard helpers ======================================
-
-	_markAnimStart($el) {
-		const active = ($el.data('_animActive') || 0) + 1;
-		$el.data('_animActive', active);
-		return active; // token
-	}
-
-	_setGuardTimer($el, id) {
-		const timers = $el.data('_animGuards') || [];
-		timers.push(id);
-		$el.data('_animGuards', timers);
-	}
-
-	_cancelAnim($el, opts = { stopSounds: false }) {
-		const timers = $el.data('_animGuards') || [];
-		timers.forEach(clearTimeout);
-		$el.removeData('_animGuards');
-
-		// bump token so any late completions are ignored
-		const active = ($el.data('_animActive') || 0) + 1;
-		$el.data('_animActive', active);
-
-		if (opts.stopSounds && typeof course?.stopSound === 'function') {
-			const beginSound = $el.attr('data-beginSound');
-			if (beginSound) {
-				try { course.stopSound(beginSound); } catch (e) {}
-			}
-		}
-	}
-
-	_shouldStillPlay($el, startToken) {
-		// token changed => stale
-		if (($el.data('_animActive') || 0) !== startToken) return false;
-		// element detached or missing
-		const el = $el[0];
-		if (!el || !el.isConnected || !document.body.contains(el)) return false;
-		// page hidden/unloading (common during navigation)
-		if (document.visibilityState === 'hidden') return false;
-		return true;
-	}
+    constructor(course, pageInfo) {
+        // Store references passed into the class (not used much yet)
+        this.course = course;
+        this.pageInfo = pageInfo;
+    }
+
+    /* =========================================   
+       1. INITIALIZE ALL .animateMe ELEMENTS
+       This runs ONCE when the page loads.
+       It prepares each element for animations later.
+    ==========================================*/
+    initAnimations() {
+
+    this._setDefaults();
+    this.duration = 0; // setup is instant
+
+    // Go through every element that has class "animateMe"
+    $(".animateMe").each((i, el) => {
+
+        const $el = $(el);
+
+        // The container the element will animate inside
+        const paneSel  = $el.attr("data-animationpane") || "#courseWindow";
+        const $pane    = $(paneSel);
+        const paneInfo = this._getWindowInfo($pane);
+
+        // This element will start at animation step 0
+        $el.attr("data-nextstep", 0);
+
+        // Make this element the active target for helper methods
+        this.target = $el;
+
+        const elInfo    = this._getElementInfo();  // current rendered position
+        const steps     = this._getAnimationStepsFromAttr();
+        const firstStep = steps[0];
+
+        // If no animation steps are defined, skip it
+        if (!firstStep) return;
+
+        const firstType = firstStep.type || "";
+
+        // 1) Save original "home" position (relative to inner pane area)
+        //    This is where the element should be when it's "at rest".
+        const origPos = {
+            x: elInfo.x - paneInfo.x,
+            y: elInfo.y - paneInfo.y,
+            scale: 1
+        };
+        $el.attr("data-origposition", JSON.stringify(origPos));
+
+        // 2) Decide where the element should START
+        //    (off-screen for slideIn types, or at home for everything else)
+        let startX = origPos.x;
+        let startY = origPos.y;
+
+        // We are in a coordinate system where:
+        //   inner-left  = 0
+        //   inner-right = paneInfo.w
+        //   border-left = -paneInfo.padLeft
+        //   border-right= paneInfo.w + paneInfo.padRight
+        //   inner-top   = 0
+        //   inner-bottom= paneInfo.h
+        //   border-top  = -paneInfo.padTop
+        //   border-bot  = paneInfo.h + paneInfo.padBottom
+
+        // slideInRight:
+        //   Start completely to the LEFT of the pane border,
+        //   so the element is not visible at all.
+        if (firstType.includes("slideInRight")) {
+            // right edge <= border-left
+            // x + elInfo.w <= -padLeft  =>  x <= -padLeft - elInfo.w
+            startX = -paneInfo.padLeft - elInfo.w;
+        }
+
+        // slideInLeft:
+        //   Start completely to the RIGHT of the pane border.
+        if (firstType.includes("slideInLeft")) {
+            // left edge >= border-right
+            // x >= paneInfo.w + padRight
+            startX = paneInfo.w + paneInfo.padRight;
+        }
+
+        // slideInUp:
+        //   Start completely BELOW the pane border.
+        if (firstType.includes("slideInUp")) {
+            // top >= border-bottom
+            // y >= paneInfo.h + padBottom
+            startY = paneInfo.h + paneInfo.padBottom;
+        }
+
+        // slideInDown:
+        //   Start completely ABOVE the pane border.
+        if (firstType.includes("slideInDown")) {
+            // bottom <= border-top
+            // y + elInfo.h <= -padTop  =>  y <= -padTop - elInfo.h
+            startY = -paneInfo.padTop - elInfo.h;
+        }
+
+        // 3) Normalize: let GSAP control position from now on
+
+        // Clear any manual top/left so CSS doesn't fight GSAP
+        $el.css({ left: 0, top: 0 });
+
+        // Respect the element's transform origin if provided
+        const transOriginAttr = $el.attr("data-transformorigin") || "center";
+        this.transform = this._getTransformOrigin(transOriginAttr);
+
+        // 4) Instantly put the element at its start position (no tween)
+        gsap.set($el, {
+            x: startX,
+            y: startY,
+            scale: 1,
+            opacity: firstType.includes("fadeIn") ? 0 : 1,
+            transformOrigin: this.transform
+        });
+
+        $el.css("visibility", "visible");
+
+        // After gsap.set(...)
+        const buttonSel = $el.attr("data-playbutton");
+        if (buttonSel) {
+            // Use a closure so each button triggers its own element
+            $(buttonSel).on("click", () => {
+                this.playAnimation($el);
+            });
+        }
+
+    });
+}
+
+
+
+
+    /* =========================================
+       2. PLAY ANIMATION FOR A GIVEN TARGET ELEMENT
+       This is called when you want something to animate.
+    ==========================================*/
+    playAnimation(target, stepIndex = null) {
+
+        this._setDefaults();
+
+        // Make sure the target is a jQuery object
+        this.target = target instanceof jQuery ? target : $(target);
+
+        if (!this.target.length) {
+            console.warn("Animation target not found:", target);
+            return;
+        }
+
+        // Determine which step to play next
+        if (stepIndex !== null && !isNaN(stepIndex)) {
+            this.currStep = stepIndex;
+        } else {
+            this.currStep = Number(this.target.attr("data-nextstep")) || 0;
+        }
+
+        // Load the animation step from the element's JSON list
+        this.currAnimation = this._readAnimationStep(this.currStep);
+
+        if (!this.currAnimation) {
+            console.warn("No animation step found:", this.currStep);
+            return;
+        }
+
+        // Build the animation settings and run it
+        this._createAnimationFromStep();
+    }
+
+    /* =========================================
+       3. BUILD ANIMATION VALUES FOR THE CURRENT STEP
+       This sets up X, Y, opacity, scale, etc.
+    ==========================================*/
+    _createAnimationFromStep() {
+
+        const orgPos = JSON.parse(this.target.attr("data-origposition"));
+
+        // Where the element should scale from (center, top-left, etc.)
+        const transOriginAttr = this.target.attr("data-transformorigin") || "center";
+        this.transform = this._getTransformOrigin(transOriginAttr);
+
+        // Figure out which container this element animates inside
+        const paneSel = this.target.attr("data-animationpane") || "#courseWindow";
+        const paneInfo = this._getWindowInfo($(paneSel));
+
+        const elInfo = this._getElementInfo();
+        const type   = this.currAnimation.type || "";
+
+        // Reset basic animation settings so nothing carries over
+        this.x        = 0;
+        this.y        = 0;
+        this.opacity  = 1;
+        this.scale    = orgPos.scale;
+        this.duration = this.currAnimation.duration || 1;
+        this.delay    = this.currAnimation.delay    || 0;
+
+        // User-defined functions and chaining (optional)
+        this.sFunction = this.currAnimation.sFunction || null;
+        this.eFunction = this.currAnimation.eFunction || null;
+        this.chain     = this.currAnimation.chain     || null;
+
+        // How much of the movement to apply (1 = full, 0.5 = half)
+        this.moveFactor = this.currAnimation.moveFactor || 1;
+
+        // GSAP easing to use
+        this.ease = this.currAnimation.ease || "power1.out";
+
+        // Start from wherever GSAP last placed the element
+        const p = this._getCurrentXY();
+        this.x = p.x;
+        this.y = p.y;
+
+        /* -----------------------------
+           MOVEMENT TYPE LOGIC
+           Each "slide" or "fade" effect
+           adjusts X/Y or opacity differently.
+        ------------------------------*/
+
+        // 1) Scale
+        if (type.includes("scale")) {
+            this.scale = this.currAnimation.sAmount || 1;
+
+            // Save new scale as the "home" scale for future animations
+            const newOrigPos = {
+                x: orgPos.x,
+                y: orgPos.y,
+                scale: this.scale
+            };
+            this.target.attr("data-origposition", JSON.stringify(newOrigPos));
+        }
+
+        // Short names for readability
+        const homeX = orgPos.x; // "home" GSAP x
+        const homeY = orgPos.y; // "home" GSAP y
+        const elemW = elInfo.w;
+        const elemH = elInfo.h;
+
+        // Get transform-origin as fractions (0..1)
+        const { ox, oy } = this._getOriginFractions();
+
+        // Scaled size
+        const scaledW = elemW * this.scale;
+        const scaledH = elemH * this.scale;
+
+        // Extra size added by scaling
+        const extraW = scaledW - elemW;
+        const extraH = scaledH - elemH;
+
+        // Visual home left/top with current scale + origin
+        // The origin sits inside the element, so scaling shifts the edges.
+        const homeLeft = homeX - extraW * ox;
+        const homeTop  = homeY - extraH * oy;
+
+        // ------------------------
+        // 2) "Slide in" back to home
+        // ------------------------
+        if (type.includes("slideInRight") || type.includes("slideInLeft")) {
+            this.x = homeX;  // back to home origin
+        }
+
+        if (type.includes("slideInUp") || type.includes("slideInDown")) {
+            this.y = homeY;  // back to home origin
+        }
+
+        // ------------------------
+        // 3) "Slide out" completely outside the pane border
+        // ------------------------
+
+        // slideOutRight: move so the element's LEFT edge is past the RIGHT border
+        if (type.includes("slideOutRight")) {
+            // border-right = paneInfo.w + paneInfo.padRight
+            const targetLeft = paneInfo.w + paneInfo.padRight;
+            const delta = targetLeft - homeLeft;
+            this.x = homeX + delta;
+        }
+
+        // slideOutLeft: move so the element's RIGHT edge is past the LEFT border
+        if (type.includes("slideOutLeft")) {
+            // border-left = -paneInfo.padLeft
+            // right edge <= border-left → left <= -padLeft - scaledW
+            const targetLeft = -paneInfo.padLeft - scaledW;
+            const delta = targetLeft - homeLeft;
+            this.x = homeX + delta;
+        }
+
+        // slideOutUp: move so the element's BOTTOM edge is past the TOP border
+        if (type.includes("slideOutUp")) {
+            // border-top = -paneInfo.padTop
+            // bottom <= border-top → top <= -padTop - scaledH
+            const targetTop = -paneInfo.padTop - scaledH;
+            const delta = targetTop - homeTop;
+            this.y = homeY + delta;
+        }
+
+        // slideOutDown: move so the element's TOP edge is past the BOTTOM border
+        if (type.includes("slideOutDown")) {
+            // border-bottom = paneInfo.h + paneInfo.padBottom
+            const targetTop = paneInfo.h + paneInfo.padBottom;
+            const delta = targetTop - homeTop;
+            this.y = homeY + delta;
+        }
+
+
+        // ------------------------
+        // 4) Partial slides using moveFactor (0..1)
+        //     - Slide *towards* pane edges but stay inside
+        // ------------------------
+
+        // Slide right: move from home towards far-right inside pane
+        if (type.includes("slideRight")) {
+            const maxLeft   = paneInfo.w - scaledW;    // rightmost left where fully visible
+            const remaining = maxLeft - homeLeft;      // how far from home to max
+            this.x = homeX + remaining * this.moveFactor;
+        }
+
+        // Slide left: move from home towards left edge (0)
+        if (type.includes("slideLeft")) {
+            const minLeft   = 0;
+            const remaining = homeLeft - minLeft;
+            this.x = homeX - remaining * this.moveFactor;
+        }
+
+        // Slide down: home towards bottom inside pane
+        if (type.includes("slideDown")) {
+            const maxTop    = paneInfo.h - scaledH;
+            const remaining = maxTop - homeTop;
+            this.y = homeY + remaining * this.moveFactor;
+        }
+
+        // Slide up: home towards top (0)
+        if (type.includes("slideUp")) {
+            const minTop    = 0;
+            const remaining = homeTop - minTop;
+            this.y = homeY - remaining * this.moveFactor;
+        }
+
+        // Fading
+        if (type.includes("fadeOut")) {
+            this.opacity = 0;
+        }
+
+        if (type.includes("fadeIn")) {
+            this.target.css("opacity", 0);
+            this.opacity = 1;
+        }
+
+        // Now run the GSAP animation
+        this.animate();
+    }
+
+    /* =========================================
+       4. RUN GSAP ANIMATION
+       This actually moves/scales/fades the element.
+    ==========================================*/
+    animate() {
+
+        gsap.to(this.target, {
+            x: this.x,
+            y: this.y,
+            opacity: this.opacity,
+            scale: this.scale,
+            transformOrigin: this.transform,
+            duration: this.duration,
+            delay: this.delay,
+            ease: this.ease,
+            onStart: () => {
+                this.onStart();  // Run start hooks
+            },
+            onComplete: () => {
+                this.onComplete(); // Run end hooks
+            }
+        });
+    }
+
+    onStart() {
+        // If developer wants a custom function to run here, call it
+        if (this.sFunction) {
+            this._callHookIfExists(this.sFunction);
+        }
+    }
+
+    onComplete() {
+
+        // Run custom "after animation" logic if provided
+        if (this.eFunction) {
+            this._callHookIfExists(this.eFunction);
+        }
+
+        // Automatically run the next animation if "chain" is set
+        if (this.chain) {
+            this.playAnimation(this.chain);
+        }
+    }
+
+    /* Simple pause/resume helpers */
+    pauseAll() {
+        gsap.globalTimeline.pause();
+    }
+
+    resumeAll() {
+        gsap.globalTimeline.resume();
+    }
+
+    /* Reset element back to the original saved location */
+    resetToOrigin(target) {
+
+        this.target = target instanceof jQuery ? target : $(target);
+        if (!this.target.length) return;
+
+        const orgPosStr = this.target.attr("data-origposition");
+        if (!orgPosStr) return;
+
+        const orgPos = JSON.parse(orgPosStr);
+
+        this._setDefaults();
+
+        this.x       = orgPos.x;
+        this.y       = orgPos.y;
+        this.scale   = orgPos.scale;
+        this.opacity = 1;
+
+        // Respect the element's transform origin here as well
+        const transOriginAttr = this.target.attr("data-transformorigin") || "center";
+        this.transform = this._getTransformOrigin(transOriginAttr);
+
+        // Instantly set the element back to its original values
+        gsap.set(this.target, {
+            x: this.x,
+            y: this.y,
+            scale: this.scale,
+            opacity: this.opacity,
+            transformOrigin: this.transform
+        });
+    }
+    
+    /* =========================================
+       5. HELPERS: ELEMENT & WINDOW INFO
+    ==========================================*/
+    _getElementInfo() {
+        return {
+            w: this.target.outerWidth() || 0,
+            h: this.target.outerHeight() || 0,
+            x: this.target.offset().left,
+            y: this.target.offset().top
+        };
+    }
+
+    _getWindowInfo($pane) {
+    // Outer position of the pane (border box)
+    const off = $pane.offset() || { left: 0, top: 0 };
+
+    // Padding values
+    const padLeft   = parseFloat($pane.css("padding-left"))   || 0;
+    const padTop    = parseFloat($pane.css("padding-top"))    || 0;
+    const padRight  = parseFloat($pane.css("padding-right"))  || 0;
+    const padBottom = parseFloat($pane.css("padding-bottom")) || 0;
+
+    // Inner content area (inside padding)
+    const innerW = ($pane.innerWidth()  || 0) - padLeft - padRight;
+    const innerH = ($pane.innerHeight() || 0) - padTop  - padBottom;
+
+    return {
+        // Top-left corner of the *inner* content area
+        x: off.left + padLeft,
+        y: off.top  + padTop,
+
+        // Usable width/height (inside padding)
+        w: innerW,
+        h: innerH,
+
+        // Raw padding (for off-screen slideIn positions)
+        padLeft,
+        padRight,
+        padTop,
+        padBottom
+    };
+}
+
+
+
+
+    /* =========================================
+       6. HELPERS: JSON STEPS & STEP INDEX
+    ==========================================*/
+    _readAnimationStep(stepIndex) {
+
+        const steps = this._getAnimationStepsFromAttr();
+
+        if (!Array.isArray(steps) || steps.length === 0) {
+            return null;
+        }
+
+        // Update the element so next time it runs stepIndex+1
+        this._setNextStep(stepIndex, steps.length);
+
+        return steps[stepIndex] || null;
+    }
+
+    _getAnimationStepsFromAttr() {
+
+        const json = this.target.attr("data-animation");
+        if (!json) return [];
+
+        try {
+            return JSON.parse(json);
+        } catch (e) {
+            console.warn("Invalid animation JSON:", e, json);
+            return [];
+        }
+    }
+
+    _setNextStep(currentStep, totalSteps) {
+
+        let next = currentStep + 1;
+
+        // Loop back to 0 after the last animation step
+        if (next >= totalSteps) {
+            next = 0;
+        }
+
+        this.target.attr("data-nextstep", next);
+    }
+
+    /* =========================================
+       7. TRANSFORM ORIGIN HELPER
+    ==========================================*/
+    _getTransformOrigin(anchor) {
+
+        if (!anchor) return "50% 50%";
+
+        const map = {
+            "top-left":      "0% 0%",
+            "top-center":    "50% 0%",
+            "top":           "50% 0%",
+            "top-right":     "100% 0%",
+            "center-left":   "0% 50%",
+            "left":          "0% 50%",
+            "center-right":  "100% 50%",
+            "right":         "100% 50%",
+            "bottom-left":   "0% 100%",
+            "bottom-center": "50% 100%",
+            "bottom":        "50% 100%",
+            "bottom-right":  "100% 100%",
+            "center":        "50% 50%"
+        };
+
+        const key = anchor.toLowerCase();
+        return map[key] || "50% 50%";
+    }
+
+    /* Reset default values before building each animation */
+    _setDefaults() {
+        this.x        = 0;
+        this.y        = 0;
+        this.scale    = 1;
+        this.anchor   = "center";
+        this.duration = 1;
+        this.delay    = 0;
+        this.sFunction = null;
+        this.eFunction = null;
+        this.chain     = null;
+        this.opacity   = 1;
+        this.transform = this._getTransformOrigin(this.anchor);
+        this.moveFactor = 1;
+    }
+
+    /* Get current GSAP x/y transform values */
+    _getCurrentXY() {
+        const el = this.target && this.target[0];
+        if (!el) return { x: 0, y: 0 };
+
+        return {
+            x: gsap.getProperty(el, "x") || 0,
+            y: gsap.getProperty(el, "y") || 0
+        };
+    }
+
+    /* Try to call a named function on window[] safely */
+    _callHookIfExists(fnName) {
+        const fn = (typeof window !== 'undefined') ? window[fnName] : undefined;
+        if (typeof fn === 'function') {
+            try {
+                fn();
+            } catch (e) {
+                console.error('Error in ' + fnName + '()', e);
+            }
+        }
+    }
+
+    /* Convert transformOrigin ("50% 50%") into fractions (0..1, 0..1) */
+    _getOriginFractions() {
+        // this.transform is like "50% 50%" or "0% 0%"
+        const t = (this.transform || "50% 50%").split(" ");
+
+        const parse = (val, fallback) => {
+            if (!val) return fallback;
+
+            // Handle percentages like "50%"
+            if (val.indexOf("%") !== -1) {
+                const n = parseFloat(val);
+                return isNaN(n) ? fallback : n / 100;
+            }
+
+            // Fallback keywords (should not occur because we map them already)
+            const v = val.toLowerCase();
+            if (v === "left" || v === "top") return 0;
+            if (v === "center") return 0.5;
+            if (v === "right" || v === "bottom") return 1;
+
+            const n = parseFloat(val);
+            return isNaN(n) ? fallback : n / 100;
+        };
+
+        const ox = parse(t[0], 0.5); // horizontal origin (0..1)
+        const oy = parse(t[1], 0.5); // vertical origin (0..1)
+
+        return { ox, oy };
+    }
 }
