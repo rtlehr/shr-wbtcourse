@@ -3,43 +3,33 @@
 <style></style>
 
 <section class="pageContent" aria-labelledby="l1-title">
-  <h1 id="l1-title">Mod 1 Page 2</h1>
-  <p>Should be a sound playing</p>
-  <p><a id="pageTemplate" class="modalWindow" href="#" data-width="400" data-height="200">Click to show modal window</a></p>
-  <p><a href="#" class="has-tip" data-tip="This is a tool tip.">Tool Tip</a></p>
 
-  <div id="zoomMe" class="animateMe zoom fadeOut"
-     data-zoom="2"
-     data-horizontalAnchor="center"
-     data-verticleAnchor="bottom"
-     data-duration="0.8"
-     data-delay="0.2"
-     data-endFunction="zoomedIn"
-     style="background-color: aqua; width: 200px;">
-  Zoom me from 100% → 175% anchored at bottom-right
-</div>
+  <h1 id="l1-title">PAGE TITLE</h1>
 
-  <div id="runnerAnimate" data-duration="2.5" data-endFunction="stopRunner" class="animateMe slideRight" style="left: 0px; width: 300px; height: 300px;">
-    <div id="runner" style="width:300px; height:300px;"></div>
-  </div>
+  <p>Content goes here…</p>
 
-  </section>
+  <p>
+    <a  id="pageTemplate" 
+        class="modalWindow notViewed" 
+        href="#" 
+        data-width="800" 
+        data-height="600"
+        data-modaltitle="Modal"
+        data-clickOrder="2">
+        Click to show modal window</a>
+  </p>
 
-<!-- MODAL WINDOW -->
+  <p><a id="toolTip" href="#" class="has-tip notViewed noclick" data-tip="This is a tool tip.">Tool Tip</a></p>
+
+</section>
+
+<!-- MODAL WINDOW CONTENT-->
 <div id="pageTemplate-dialog" title="Basic dialog" style="display: none;">
-  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
-</div>
-
-<!-- one reusable dialog -->
-<div id="tipDialog" title="Info" style="display:none;">
-  <div class="tip-body"></div>
+  <p>This is the default dialog which is useful for displaying information.
+     The dialog window can be moved, resized and closed with the 'x' icon.</p>
 </div>
 
 <script>
-
-  if (window.cssAnim) {
-    window.cssAnim = null;
-  }
 
   function pageLoadedFunction() {
     
@@ -47,41 +37,10 @@
 
   }
 
-  async function finishedMovingIn() {
-
+  function finishedMovingIn() {
+    
     console.log("finishedMovingIn function called");
 
-    console.log("window.cssAnim2 " + window.cssAnim);
-
-    window.cssAnim = new SpriteSheet({
-      src: 'content/images/runner/runner2.png',
-      frameWidth: 300,
-      frameHeight: 300,
-      fps: 6,
-      mode: 'css'
-    });
-
-    await window.cssAnim.init('#runner');
-
-    window.cssAnim.setRange(4,6);
-
-    window.cssAnim.play();
-
-    course.playAnimation("#runnerAnimate");
-
-    course.playAnimation("#zoomMe");
-
   }
 
-  async function stopRunner()
-  {
-    window.cssAnim.pause();           
-    window.cssAnim.setRange(0, window.cssAnim.totalFrames - 1, { snap: false });
-    window.cssAnim.gotoFrame(0); 
-  }
-
-  function zoomedIn()
-  {
-    console.log("zoomedIn function called");
-  }
 </script>

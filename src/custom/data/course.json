@@ -8,85 +8,80 @@
   },
   "modules": [
     {
-      "id": "mod-0",
+      "id": "mod-1",
       "title": "Module 01",
       "pages": [
         {
           "id": "p-1",
           "title": "Page 01",
           "url": "content/mod00/page01.html",
-          "preloadAssets": [
-            "assets/img/intro-hero.jpg",
-            "assets/audio/intro.mp3"
-          ]
+          "quiz": {},
+          "preloadAssets": []
         },
         {
           "id": "p-2",
           "title": "Page 02",
           "url": "content/mod00/page02.html",
-          "preloadAssets": []
-        }
-      ]
-    },
-    {
-      "id": "mod-1",
-      "title": "Module 02",
-      "pages": [
-        {
-          "id": "p-1",
-          "title": "Page 01",
-          "url": "content/mod01/page01.html",
-          "preloadAssets": [
-            "assets/img/intro-hero.jpg",
-            "assets/audio/intro.mp3"
-          ]
-        },
-        {
-          "id": "p-2",
-          "title": "Page 02",
-          "url": "content/mod01/page02.html",
+          "quiz": {},
           "preloadAssets": []
         },
         {
           "id": "p-3",
           "title": "Page 03",
-          "url": "content/mod01/page03.html",
+          "url": "content/mod00/page03.html",
+          "quiz": {},
           "preloadAssets": []
-        }
-      ]
-    },
-    {
-      "id": "mod-2",
-      "title": "Module 03",
-      "pages": [
-        {
-          "id": "p-1",
-          "title": "Page 01",
-          "url": "content/mod02/page01.html",
-          "quiz": {
-            "credit": true,
-            "answer": [0],
-            "correctFeedback": "Question 1, Well done!",
-            "incorrectFeedback": "Question 1, Please try again."
-          },
-          "preloadAssets": [
-            "assets/img/intro-hero.jpg",
-            "assets/audio/intro.mp3"
-          ]
         },
         {
-          "id": "p-2",
-          "title": "Page 02",
-          "url": "content/mod02/page02.html",
-          "quiz": {
-            "credit": false,
-            "answer": [0, 1, 2],
-            "correctFeedback": "Question 2, Well done!",
-            "incorrectFeedback": "Question 2, Please try again."
-          },
+          "id": "p-4",
+          "title": "Page 04",
+          "url": "content/mod00/page04.html",
+          "quiz": {},
+          "preloadAssets": []
+        },
+        {
+          "id": "p-5",
+          "title": "Page 05",
+          "url": "content/mod00/page05.html",
+          "quiz": {},
+          "preloadAssets": []
+        },
+        {
+          "id": "p-6",
+          "title": "Page 06",
+          "url": "content/mod00/page06.html",
+          "quiz": {},
+          "preloadAssets": []
+        },
+        {
+          "id": "p-7",
+          "title": "Page 07",
+          "url": "content/mod00/page07.html",
+          "quiz": {},
+          "preloadAssets": []
+        },
+        {
+          "id": "p-8",
+          "title": "Page 08",
+          "url": "content/mod00/page08.html",
+          "quiz": {},
+          "preloadAssets": []
+        },
+        {
+          "id": "p-9",
+          "title": "Page 09",
+          "url": "content/mod00/page09.html",
+          "quiz": {},
+          "preloadAssets": []
+        },
+        {
+          "id": "p-10",
+          "title": "Page 10",
+          "url": "content/mod00/page10.html",
+          "quiz": {},
           "preloadAssets": []
         }
       ]
-    }
+    } 
   ]
 }

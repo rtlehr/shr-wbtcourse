@@ -1,81 +1,32 @@
-<!-- pages/lesson1.html -->
 <meta name="wbt-init" content="Lesson1Init">
 
+<style></style>
+
 <section class="pageContent" aria-labelledby="l1-title">
-  <h1 id="l1-title">Mod 1 Page 1</h1>
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ultrices ipsum eget nisi ultricies viverra. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam maximus viverra feugiat. Vestibulum condimentum ullamcorper mauris, ac fringilla ligula varius eu. Ut tortor arcu, volutpat sit amet iaculis sed, euismod nec est. Suspendisse bibendum mattis ipsum sed viverra. Nulla at congue velit. Sed tempus eros sit amet tristique maximus. Cras lobortis, ipsum in laoreet commodo, quam leo placerat diam, ac elementum libero erat a mauris. Donec at pretium neque, non venenatis ligula. Nunc dictum augue id sem viverra, et hendrerit ipsum venenatis. Phasellus sed nisl augue.</p>
- 
-  <p>&nbsp;</p>
 
-  <div class="row">
-    <div class="col-md-6" id="animatedPane" style="overflow: hidden; border: solid blue 1px;padding-top: 25px; padding-bottom: 25px;">
-      <div id="animated" style="background-color: lightcoral;"
-      class="animateMe"
-      data-animationpane="#animatedPane"
-      data-animation='[
-                        { "type": "slideInUp",
-                          "chain": "#animatedTwo"
-                        },
-                        {
-                          "type": "slideOutDown",
-                          "chain": "#animatedTwo"
-                        }
-                      ]'>
-        ANIMATION
-      </div>
-    </div>
-    <div class="col-md-6" id="animatedTwoPane" style="overflow: hidden; border: solid blue 1px;">
-      <div id="animatedTwo" style="background-color: yellowgreen;"
-      class="animateMe"
-      data-animationpane="#animatedTwoPane"
-      data-animation='[
-                        {
-                          "type": "slideInLeft", 
-                          "chain": "#mybox"
-                        },
-                        { 
-                          "type": "slideOutRight", 
-                          "chain": "#mybox"
-                        }
-                      ]'>ANIMATION TWO</div>
-    </div>
-  </div>
-<p>&nbsp;</p>
+  <h1 id="l1-title">PAGE TITLE</h1>
 
-<div id="mainRow" style="position: relative; height: 200px; width: 1080px; border: red solid 1px;">
-  <div id="mybox" 
-    style="position:absolute;width:120px;height:80px;background-color:brown;color:#fff;border-radius:8px;float:left;bottom:0;"
-      class="animateMe"
-      data-animationpane="#mainRow"
-      data-animation='[
-                        { 
-                          "type": "slideRight", 
-                          "chain": "#animated"
-                        },
-                        { 
-                          "type": "slideUp", 
-                          "chain": "#animated"
-                        },
-                        { 
-                          "type": "slideLeft", 
-                          "chain": "#animated"
-                        },
-                        { 
-                          "type": "slideDown", 
-                          "chain": "#animated",
-                          "sFunction": "myStartFunction",
-                          "eFunction": "myEndFunction"
-                        }
-                      ]'>
-  Hello
-  </div>
-</div>
+  <p>Content goes here…</p>
+
+  <p>
+    <a  id="pageTemplate" 
+        class="modalWindow notViewed" 
+        href="#" 
+        data-width="800" 
+        data-height="600"
+        data-modaltitle="Modal"
+        data-clickOrder="2">
+        Click to show modal window</a>
+  </p>
+
+  <p><a id="toolTip" href="#" class="has-tip notViewed noclick" data-tip="This is a tool tip.">Tool Tip</a></p>
 
 </section>
 
-<!-- one reusable dialog -->
-<div id="tipDialog" title="Info" style="display:none;">
-  <div class="tip-body"></div>
+<!-- MODAL WINDOW CONTENT-->
+<div id="pageTemplate-dialog" title="Basic dialog" style="display: none;">
+  <p>This is the default dialog which is useful for displaying information.
+     The dialog window can be moved, resized and closed with the 'x' icon.</p>
 </div>
 
 <script>
@@ -90,26 +41,6 @@
     
     console.log("finishedMovingIn function called");
 
-    course.playAnimation("#animated");
-
-    //course.playAnimation("#animatedTwo");
-
-    //course.playAnimation("#mybox");
-
-  }
-
-  function myStartFunction()
-  {
-    console.log("--- We have started the last movement");
-  }
-
-  function myEndFunction()
-  {
-    console.log("--- We have ended the last movement");
-
-    course.playSound("typewriterbell"); 
   }
 
 </script>
-
-
