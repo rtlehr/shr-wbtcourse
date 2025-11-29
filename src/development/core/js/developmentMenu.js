@@ -25,17 +25,23 @@ class DevelopmentMenu {
   }
 
   reloadPage() {
-    
-    this.course.gotoPage(curMod, curPage);
-
+    this.course.gotoPage(this.course.curMod, this.course.curPage);
   }
+
+  goToPage() {
+    const mod  = Math.max(1, parseInt($('#dev-mod').val(), 10) || 1);
+    const page = Math.max(1, parseInt($('#dev-page').val(), 10) || 1);
+
+    this.course.gotoPage(mod - 1, page - 1);
+  }
+
 
   switchModes()
   {
 
-    creditMode = !creditMode;
+    this.course.creditMode = !this.course.creditMode;
 
-    if(creditMode)
+    if(this.course.creditMode)
     {
       $("#courseMode").html("Credit Mode");
     }
@@ -46,14 +52,6 @@ class DevelopmentMenu {
 
     this.course.checkViewedCount();
     
-  }
-
-  goToPage()
-  {
-      const mod  =Math.max(1, parseInt($('#dev-mod').val(), 10) || 1);
-      const page = Math.max(1, parseInt($('#dev-page').val(), 10) || 1);
-
-      this.course.gotoPage((mod-1), (page-1));
   }
 
 }

@@ -4,23 +4,16 @@ class Parallax {
 
     this.opts = $.extend(true, { parent: null }, opts);
 
-      /*let eWidth = $(this).width();   
-      let eHeight = $(this).height();
-      let eTop = $(this).offset().top; 
-      let eLeft = $(this).offset().left;
+    this.wHeight = $(this.opts.parent).height();
+    this.wWidth  = $(this.opts.parent).width();
 
-      console.log("animation Pane: " + $(this).attr("data-animationPane"));
+    // Respect reduced motion
+    if (MotionPrefs.isReduced()) {
+      // Optionally: ensure elements are in their "resting" position
+      return;
+    }
 
-      let cW = $(this).attr("data-animationPane") || "#courseWindow";*/
-
-      this.wHeight = $(this.opts.parent).height();
-      this.wWidth = $(this.opts.parent).width();
-
-      /*let wTop = $(this.opts.parent).offset().top;
-      let wLeft = $(this.opts.parent).offset().left;*/
-
-      this.setAnimation();
-
+    this.setAnimation();
   }
 
   init() {}

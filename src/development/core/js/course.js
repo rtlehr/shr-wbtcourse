@@ -1,15 +1,3 @@
-// Tracks the current module index (0-based)
-let curMod = 0;
-
-// Tracks the current page index (0-based)
-let curPage = 0;
-
-// Enables/disables development features and tools
-let devMode = true;
-
-// Enables/disables credit mode (usage TBD elsewhere in code)
-let creditMode = false;
-
 // Tracks navigation direction: 1 = next, -1 = previous, 0 = none
 let nextDirection = 0;   
 
@@ -24,6 +12,9 @@ const mqPhone   = window.matchMedia('(max-width: 575.98px)');
 const mqTablet  = window.matchMedia('(min-width: 768px) and (max-width: 991.98px)');
 const mqDesktop = window.matchMedia('(min-width: 992px)');
 
+const mqReduceMotion = window.matchMedia
+  ? window.matchMedia('(prefers-reduced-motion: reduce)')
+  : { matches: false };
 
 // Handles changes to screen size breakpoints and notifies the Course object.
 function handleBreakpointChange() {
@@ -45,39 +36,24 @@ $(function () {
   course = new Course();
   course.init();
 
-  // Set up the Sound manager for the course  
-  sound = new Sound(course);
-
-  // Preload commonly used sound effects
-  course.addSound("buttonClick", "content/audio/computer-mouse-click.mp3");
-  course.addSound("holdMyBeer", "content/audio/hold-my-beerwatch-this.mp3");
-  course.addSound("piano", "content/audio/piano_with_horror_me.mp3");
-  course.addSound("waitAMinute", "content/audio/wait-a-minute-who-are-you.mp3");
-  course.addSound("wow", "content/audio/wow.mp3");
-  course.addSound("typewriterkeys", "content/audio/typewriter-keys.mp3");
-  course.addSound("typewriterbell", "content/audio/typewriter-bell.mp3");
-
   // Show or hide development tools based on devMode
-  if (devMode) {
-    developmentMenu = new DevelopmentMenu(course);
+  if (course.devMode) {
+    const developmentMenu = new DevelopmentMenu(course);
     developmentMenu.init();
     $("#dev-tools").css("visibility", "visible");
-  }
-  else {
+  } else {
     $("#dev-tools").remove();
   }
 
   // Previous page button handler
   $('#previousButton').on('click', (e) => {
     e.preventDefault();
-    course.playSound("buttonClick");
     course.gotoPreviousPage();
   });
 
   // Next page button handler
   $('#nextButton').on('click', (e) => {
     e.preventDefault();
-    course.playSound("buttonClick");
     course.gotoNextPage();
   });
 
@@ -102,14 +78,25 @@ $(function () {
 
 class Course {
   
-  
   // Constructs a new Course instance and initializes basic course properties.
   constructor() {
     this.courseContent = null;  // Holds loaded course JSON data
     this.modules = [];          // Holds Module instances
+
+    //Keep track of course location
+    this.curMod = 0;
+    this.curPage = 0;
+
+    this.nextDirection = 0;
+
+    // Enables/disables development features and tools
+    this.devMode = true;
+
+    // Enables/disables credit mode (usage TBD elsewhere in code)
+    this.creditMode = false;
+
   }
 
-  
   // Asynchronously initializes the course: loads JSON data, creates modules, and initializes navigation and quizzes.
   async init() {
 
@@ -127,11 +114,25 @@ class Course {
     }
 
     // Set up supporting managers/classes
-    this.animation = new Animation();
+    this.animation = new Animation(this);
+
+    this.sound = new Sound(this);
+
+    this.addSound("buttonClick", "content/audio/computer-mouse-click.mp3");
+    this.addSound("holdMyBeer", "content/audio/hold-my-beerwatch-this.mp3");
+    this.addSound("piano", "content/audio/piano_with_horror_me.mp3");
+    this.addSound("waitAMinute", "content/audio/wait-a-minute-who-are-you.mp3");
+    this.addSound("wow", "content/audio/wow.mp3");
+    this.addSound("typewriterkeys", "content/audio/typewriter-keys.mp3");
+    this.addSound("typewriterbell", "content/audio/typewriter-bell.mp3");
 
     this.quizManager = new QuizManager(this, this.courseContent.quizSettings);
 
-    this.navigation = new Navigation(this, this.modules, this.quizManager);  
+    this.interface   = new Interface(this, this.modules);
+
+    this.interactionCheck = new InteractionCheck(this, this.interface);
+
+    this.navigation = new Navigation(this, this.modules, this.interface, this.quizManager, this.interactionCheck);  
     this.navigation.init();
 
     // Load the initial intro screen
@@ -152,7 +153,7 @@ class Course {
     let d = 1;
 
     // If the clicked module is before the current one, reverse direction
-    if (module < curMod) {
+    if (module < this.curMod) {
       d = -1;
     }
 
@@ -163,19 +164,42 @@ class Course {
   // Navigates to the next page in the course using the Navigation object.
   gotoNextPage() {
     nextDirection = 1;
-    this.navigation.calcNextPage(1);
+    this._calcAndLoadNextPage(1);
   }
 
   
   // Navigates to the previous page in the course using the Navigation object.
   gotoPreviousPage() {
     nextDirection = -1;
-    this.navigation.calcNextPage(-1);
+    this._calcAndLoadNextPage(-1);
   }
 
-  
+  // NEW helper – moves the old calcNextPage logic into Course
+  _calcAndLoadNextPage(direction) {
+    let mod = this.curMod;
+    let page = this.curPage;
+
+    page += direction;
+
+    const totalPagesInMod = this.modules[mod].getTotalPages();
+
+    if (page > totalPagesInMod - 1) {
+      page = 0;
+      mod++;
+    } else if (page < 0) {
+      mod--;
+      page = this.modules[mod].getTotalPages() - 1;
+    }
+
+    this.gotoPage(mod, page, direction);
+  }
+
   // Navigates directly to a specific module and page, with an optional direction value.
   gotoPage(mod, page, d = 1) {
+    // store indices here
+    this.curMod = mod;
+    this.curPage = page;
+
     this.navigation.loadPage(mod, page, d);
   }
 
@@ -196,27 +220,20 @@ class Course {
   //
   /******************************* */
   
-  // Registers a new sound with the global sound manager.
   addSound(soundName, soundURL) {
-    sound.add(soundName, soundURL);
+    this.sound.add(soundName, soundURL);
   }
 
-  
-  // Plays a sound by name using the sound manager.
   playSound(soundName) {
-    sound.playsound(soundName);
+    this.sound.playsound(soundName);
   }
 
-  
-  // Stops a specific sound by name using the sound manager.
   stopSound(soundName) {
-    sound.stop(soundName);
+    this.sound.stop(soundName);
   }
 
-  
-  // Stops all currently playing sounds.
   stopAllSounds() {
-    sound.stopAll();
+    this.sound.stopAll();
   }
 
   /******************************* */
@@ -224,11 +241,6 @@ class Course {
   // HELPERS
   //
   /******************************* */
-  
-  // Checks how many pages have been viewed via the Navigation object (e.g., for completion tracking).
-  checkViewedCount() {
-    this.navigation.checkViewedCount();
-  }
 
   // Returns the total number of modules in the course.
   getTotalMods() {

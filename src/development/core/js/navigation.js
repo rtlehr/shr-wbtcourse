@@ -1,17 +1,18 @@
 class Navigation {
-  constructor(course, modules, quizManager) {
+  constructor(course, modules, int, quizManager, interactionCheck) {
 
     this.course  = course;
     this.modules = modules;
     this.quizManager = quizManager;
+    this.interactionCheck = interactionCheck;
     this.pageName = "";
     
-    this.lmsManagement = new lmsManagement();  
+    this.lmsManagement = new lmsManagement(this.course);  
     
     // Dependencies
     this.modalWindow = new modalWindow();
-    this.toolTip     = new toolTip();
-    this.interface   = new Interface(this.course, this.modules);
+    this.toolTip = new toolTip(this.interactionCheck);
+    this.interface = int;
 
     // DOM cache
     this.$row         = $('#wbtContentRow');
@@ -24,7 +25,6 @@ class Navigation {
     this.animateWidth = 0;
     this.animateLeft  = 0;
 
-    this.contentRowDesktopPos = null; // optional remember-desktop-pos
   }
 
   /* ---------- Lifecycle ---------- */
@@ -37,24 +37,6 @@ class Navigation {
 
     this._initResizeHandler();
 
-  }
-
-  /* ---------- Navigation API (same names) ---------- */
-
-  calcNextPage(direction) {
-    // Uses global curMod/curPage as in your codebase
-    curPage += direction;
-
-    var total = this.modules[curMod].getTotalPages();
-    if (curPage > total - 1) {
-      curPage = 0;
-      curMod++;
-    } else if (curPage < 0) {
-      curMod--;
-      curPage = this.modules[curMod].getTotalPages() - 1;
-    }
-
-    this.loadPage(curMod, curPage, direction);
   }
 
   loadPage(mod, page, direction = 1) {
@@ -82,45 +64,63 @@ class Navigation {
   }
 
     animatePage(direction) {
-      this.checkFooterVisibility();
-      const $loadDiv = this._paneForDirection(direction);
+    this.checkFooterVisibility();
+    const $loadDiv = this._paneForDirection(direction);
 
-      const width = this.animateWidth;
-      const offset = -direction * width;
+    // If user prefers reduced motion: DON'T slide, just swap instantly
+    if (MotionPrefs.isReduced()) {
 
-      // position row at 0 with next panel preloaded off-screen
-      this.$row.css({ transform: 'translate3d(0,0,0)' });
-      $loadDiv.css({ transform: `translate3d(${offset}px,0,0)` });
+      const modIndex  = this.course.curMod;
+      const pageIndex = this.course.curPage;
 
-      // Animate both with CSS classes or inline transition
-      const dur = 800;
-      this.$row.add($loadDiv).css({
-        transition: `transform ${dur}ms ease`
-      });
+      this.$currentPage.html($loadDiv.html());
+      this._buildPageName(modIndex, pageIndex);
+      this.$currentPage.find(".pageContent").attr("id", this.pageName);
+      $loadDiv.empty();
 
-      // Force reflow
-      void this.$row[0].offsetWidth;
+      this.interface.setInterface();
+      this.interface.setPageNumber(this.modules[modIndex].getTotalPages());
+      this.cleanCourse();
+      this._callHookIfExists('finishedMovingInCourseFunction');
+      this._callHookIfExists('finishedMovingIn');
 
-      // Slide row by width
-      this.$row.css({ transform: `translate3d(${offset}px,0,0)` });
-      $loadDiv.css({ transform: `translate3d(0,0,0)` });
+      return; // IMPORTANT: skip animated path below
+    }
 
-      setTimeout(() => {
-        // cleanup + swap content
-        this.$row.add($loadDiv).css({ transition: '', transform: '' });
-        this.$currentPage.html($loadDiv.html());
-        this._buildPageName(curMod, curPage);
-        this.$currentPage.find(".pageContent").attr("id", this.pageName);
-        $loadDiv.empty();
+  // Normal animated path
+  const width = this.animateWidth;
+  const offset = -direction * width;
 
-        this.interface.setInterface();
-        this.interface.setPageNumber(this.modules[curMod].getTotalPages());
-        this.cleanCourse();
-        this._callHookIfExists('finishedMovingInCourseFunction');
-        this._callHookIfExists('finishedMovingIn');
-      }, dur);
-  }
+  this.$row.css({ transform: 'translate3d(0,0,0)' });
+  $loadDiv.css({ transform: `translate3d(${offset}px,0,0)` });
 
+  const dur = 800;
+  this.$row.add($loadDiv).css({
+    transition: `transform ${dur}ms ease`
+  });
+
+  void this.$row[0].offsetWidth;
+
+  this.$row.css({ transform: `translate3d(${offset}px,0,0)` });
+  $loadDiv.css({ transform: `translate3d(0,0,0)` });
+
+  setTimeout(() => {
+    this.$row.add($loadDiv).css({ transition: '', transform: '' });
+    const modIndex  = this.course.curMod;
+    const pageIndex = this.course.curPage;
+
+    this.$currentPage.html($loadDiv.html());
+    this._buildPageName(modIndex, pageIndex);
+    this.$currentPage.find(".pageContent").attr("id", this.pageName);
+    $loadDiv.empty();
+
+    this.interface.setInterface();
+    this.interface.setPageNumber(this.modules[modIndex].getTotalPages());
+    this.cleanCourse();
+    this._callHookIfExists('finishedMovingInCourseFunction');
+    this._callHookIfExists('finishedMovingIn');
+  }, dur);
+}
 
   checkFooterVisibility() {
     // Show footer on desktop if currently at top:0
@@ -133,34 +133,32 @@ class Navigation {
     }
   }
 
-  adjustContentVisibility() {
-  const leftStr = this.$row.css('left'); // e.g. "-1200px"
-  const left = parseFloat(leftStr) || 0;
+    adjustContentVisibility() {
 
-  if (left < 0 && this._isPhone()) {
-    if (this.contentRowDesktopPos == null) {
-      this.contentRowDesktopPos = leftStr;
+    // On phones, make sure the row is anchored left = 0
+    if (this._isPhone()) {
+      this.$row.css('left', '0px');
+      return;
     }
-    this.$row.css('left', '0px');
+
+    // On desktop/tablet, we don't rely on 'left' anymore
+    // because page transitions use transforms.
+    // This function is kept for potential future tweaks.
   }
 
-  if (this._isDesktop() && this.contentRowDesktopPos != null) {
-    this.$row.css('left', this.contentRowDesktopPos);
-  }
-}
 
 
    cleanCourse()
   {
     //remove uneeded DIVS
-    $(".ui-widget-content").each(function(){   
+   /* $(".ui-widget-content").each(function(){   
 
       if(!$(this).hasClass("modalKeepMe"))
       {
         $(this).remove();
       }
 
-    });
+    });*/
 
     this.addPageFunctionality();
     
@@ -174,15 +172,10 @@ class Navigation {
 
     this.course.animation.initAnimations();
 
-    this.checkViewedCount();
+    this.interactionCheck.checkForNotViewed();
 
     this.checkQuiz();
 
-  }
-
-  checkViewedCount()
-  {
-    this.interface.checkViewedCount();
   }
 
   adjustToolTip()
@@ -190,27 +183,17 @@ class Navigation {
     this.toolTip.adjustForScreenSize();
   }
 
-  /*playAnimation(element, index)
-  {
-
-    console.log("navigation.playAnimation: " + element);
-
-    this.animation.playAnimation(element, index);
-
-  }*/
-
   checkQuiz()
   {
 
-    console.log("Has Quiz: " + this.modules[curMod].pages[curPage].isQuiz());
+    const modIndex = this.course.curMod;
+    const pageIndex = this.course.curPage;
 
-    if(this.modules[curMod].pages[curPage].isQuiz())
-    {
-      this.quizManager.init(this.modules[curMod].pages[curPage].quizAnswers());
+    if (this.modules[modIndex].pages[pageIndex].isQuiz()) {
+      this.quizManager.init(this.modules[modIndex].pages[pageIndex].quizAnswers());
     }
-  
-  }
 
+  }
 
   /* ---------- Helpers ---------- */
 
