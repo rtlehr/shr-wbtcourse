@@ -41,6 +41,12 @@ class Navigation {
 
   loadPage(mod, page, direction = 1) {
 
+    const modIndex  = this.course.curMod;
+    const pageIndex = this.course.curPage;
+
+    this.interface.setInterface();
+    this.interface.setPageNumber(this.modules[modIndex].getTotalPages());
+
     this.course.stopAllSounds();
 
     var $targetPane = this._paneForDirection(direction);
@@ -48,9 +54,9 @@ class Navigation {
 
     // Phone path: load directly into current
     if (this._isPhone()) {
-      this._loadInto(this.$currentPage, url, () => {
+      this._loadInto(this.$currentPage, url, () => {   
         this._callPageLoadedHook();
-        this.interface.setInterface();
+       // this.interface.setInterface();
         this.cleanCourse();
       });
       return;
@@ -70,16 +76,11 @@ class Navigation {
     // If user prefers reduced motion: DON'T slide, just swap instantly
     if (MotionPrefs.isReduced()) {
 
-      const modIndex  = this.course.curMod;
-      const pageIndex = this.course.curPage;
-
       this.$currentPage.html($loadDiv.html());
       this._buildPageName(modIndex, pageIndex);
       this.$currentPage.find(".pageContent").attr("id", this.pageName);
       $loadDiv.empty();
 
-      this.interface.setInterface();
-      this.interface.setPageNumber(this.modules[modIndex].getTotalPages());
       this.cleanCourse();
       this._callHookIfExists('finishedMovingInCourseFunction');
       this._callHookIfExists('finishedMovingIn');
@@ -114,8 +115,8 @@ class Navigation {
     this.$currentPage.find(".pageContent").attr("id", this.pageName);
     $loadDiv.empty();
 
-    this.interface.setInterface();
-    this.interface.setPageNumber(this.modules[modIndex].getTotalPages());
+   // this.interface.setInterface();
+    //this.interface.setPageNumber(this.modules[modIndex].getTotalPages());
     this.cleanCourse();
     this._callHookIfExists('finishedMovingInCourseFunction');
     this._callHookIfExists('finishedMovingIn');
@@ -173,6 +174,26 @@ class Navigation {
     this.course.animation.initAnimations();
 
     this.interactionCheck.checkForNotViewed();
+
+    this.adjustPageNavButtons();
+
+  }
+
+  adjustPageNavButtons()
+  {
+
+    const modIndex  = this.course.curMod;
+    const pageIndex = this.course.curPage;
+
+    if(modIndex == 0 && pageIndex == 0)
+    {
+      this.interface.turnOffPreviousButton();
+    }
+
+    if(((modIndex+1) == this.modules.length) && ((pageIndex+1) == this.modules[modIndex].getTotalPages()))
+    {
+      this.interface.turnOffNextButton();
+    }
 
     this.checkQuiz();
 

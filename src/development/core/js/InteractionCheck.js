@@ -10,6 +10,7 @@ class InteractionCheck {
 
         if ($allNotViewed.length === 0) {
             // Everything has been viewed already
+            console.log("checkForNotViewed() ");
             this.interface.turnOnNextButton();
             return;
         }
