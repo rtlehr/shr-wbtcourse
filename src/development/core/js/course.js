@@ -238,6 +238,19 @@ class Course {
 
   /******************************* */
   //
+  // interactiveCheck CONTROL
+  //
+  /******************************* */
+
+  elementViewed(el)  
+  {
+
+    this.interactionCheck.elementViewed(el) ;
+    
+  }
+
+  /******************************* */
+  //
   // HELPERS
   //
   /******************************* */

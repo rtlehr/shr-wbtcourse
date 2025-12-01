@@ -20,7 +20,7 @@
                         ]'>PHOTO OF General Manager
       </div>
 
-      <div id="heroImage2" class="animateMe photo-frame" style="position: absolute; left: 80px; background-color: gray; width: 400px; height: 400px"  
+      <div id="heroImage2" class="animateMe photo-frame" style="position: absolute; top:25px; left: 80px; background-color: gray; width: 400px; height: 400px"  
         data-animation='[
                           { 
                             "type": "slideInRight rotate",
@@ -30,12 +30,14 @@
                         ]'>PHOTO OF General Manager
       </div>
 
-      <div id="heroImage3" class="animateMe photo-frame" style="position: absolute; left: 50px; background-color: gray; width: 400px; height: 400px"  
+      <div id="heroImage3" class="animateMe photo-frame notViewed noClick" style="position: absolute; top:5px; left: 50px; background-color: gray; width: 400px; height: 400px"  
         data-animation='[
                           { 
                             "type": "slideInRight rotate",
                             "rAmount": 5,
-                            "delay": 1.5                          }
+                            "delay": 1.5,
+                            "eFunction": "lastAnimation"
+                          }
                         ]'>PHOTO OF General Manager
       </div>
       
@@ -74,6 +76,11 @@
 
     course.playAnimation("#heroImage");
 
+  }
+
+  function lastAnimation()
+  {
+    course.elementViewed("#heroImage3");
   }
 
 </script>

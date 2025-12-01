@@ -65,12 +65,12 @@ class InteractionCheck {
         this._updateClickOrderState();
     }
 
-    elementViewed(el)
+    elementViewed(el)   
     {
         
-        if(el.hasClass("notViewed"))
+        if($(el).hasClass("notViewed"))
         {
-            el.removeClass("notViewed").addClass("viewed");
+            $(el).removeClass("notViewed").addClass("viewed");
             this.checkInteractions();
         }
         
