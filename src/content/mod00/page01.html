@@ -6,7 +6,51 @@
 
   <h1 id="l1-title">Welcome to Seabreeze Horizons</h1>
 
-  <p>Content goes here…</p>
+  <div class="row">
+
+    <div class="col-md-6">
+
+      <div id="heroImage" class="animateMe photo-frame" style="position: absolute; left: 65px; background-color: gray; width: 400px; height: 400px"  
+        data-animation='[
+                          { 
+                            "type": "slideInRight rotate",
+                            "rAmount": 12,
+                            "chain": "#heroImage2" 
+                          }
+                        ]'>PHOTO OF General Manager
+      </div>
+
+      <div id="heroImage2" class="animateMe photo-frame" style="position: absolute; left: 80px; background-color: gray; width: 400px; height: 400px"  
+        data-animation='[
+                          { 
+                            "type": "slideInRight rotate",
+                            "rAmount": -10,
+                            "delay": 1.5,
+                            "chain": "#heroImage3"                          }
+                        ]'>PHOTO OF General Manager
+      </div>
+
+      <div id="heroImage3" class="animateMe photo-frame" style="position: absolute; left: 50px; background-color: gray; width: 400px; height: 400px"  
+        data-animation='[
+                          { 
+                            "type": "slideInRight rotate",
+                            "rAmount": 5,
+                            "delay": 1.5                          }
+                        ]'>PHOTO OF General Manager
+      </div>
+      
+    </div>
+
+
+
+    <div class="col-md-6">
+      <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+
+      <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+
+      <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+    </div>
+  </div>
 
 </section>
 
@@ -27,6 +71,8 @@
   function finishedMovingIn() {
     
     console.log("finishedMovingIn function called");
+
+    course.playAnimation("#heroImage");
 
   }
 
