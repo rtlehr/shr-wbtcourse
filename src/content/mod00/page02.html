@@ -6,7 +6,27 @@
 
   <h1 id="l1-title">About Our Resort</h1>
 
-  <p>Content goes here…</p>
+  <div id="showText" class="notViewed" style="background-color: brown; width: 50px; height: 50px;"></div>
+
+  <div id="textToShowParent" style="width: 300px; height: 150px; overflow: hidden;">
+
+    <div id="textToShow" class="animateMe" style="background-color: yellow; width: 300px; height: 150px;"
+      data-animationpane="#textToShowParent"
+      data-playbutton="#showText"
+      data-animation='[
+                        { 
+                          "type": "slideInDown fadeIn",
+                          "duration": 0.5                
+                        },
+                        { 
+                          "type": "slideOutUp fadeOut",
+                          "duration": 0.5       
+                        }
+                      ]'>
+      <p>Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+    </div>
+
+  </div>
 
 </section>
 
@@ -27,6 +47,8 @@
   function finishedMovingIn() {
     
     console.log("finishedMovingIn function called");
+
+    //course.playAnimation("#textToShow");
 
   }
 
