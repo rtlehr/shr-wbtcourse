@@ -10,12 +10,14 @@
 
   <div id""rollOvers" style="position: absolute; top: 0px; left: 0px;">
 
-    <div id="emplyeeCentral" style="position: relative; top: 161px; left: 350px;">
+    <!-- Employee Central -->
+    <div id="emplyeeCentral" style="position: absolute; top: 161px; left: 350px;">
+
       <div id="emplyeeCentralButton" class="notViewed" style="width: 125px; height: 110px;"></div>
 
       <div id="textToShowParent" style="width: 300px; height: 150px; overflow: hidden;">
 
-        <div id="emplyeeCentralText" class="animateMe" style="background-color: yellow; width: 300px; height: 150px;"
+        <div id="emplyeeCentralText" class="animateMe" style="background-color: yellow; width: 290px; height: 140px; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);"
           data-animationpane="#textToShowParent"
           data-playOnRoleover="#emplyeeCentralButton",
           data-playOnRollOff="#emplyeeCentralButton"
@@ -27,13 +29,47 @@
                             { 
                               "type": "slideOutUp fadeOut",
                               "duration": 0.5,
-                              "eFunction": "lastAnimation"
+                              "eFunction": "lastAnimation|#emplyeeCentralButton"
                             }
                           ]'>
           <p>Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+
         </div>
+
       </div>
+
     </div>
+
+    <!-- Maintance -->
+    <div id="maintance" style="position: absolute; top: 227px; left: 237px;">
+
+      <div id="maintanceButton" class="notViewed" style="width: 106px; height: 68px;"></div>
+
+      <div id="maintanceToShowParent" style="width: 300px; height: 150px; overflow: hidden;">
+
+        <div id="maintanceText" class="animateMe" style="background-color: yellow; width: 290px; height: 140px; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);"
+          data-animationpane="#maintanceToShowParent"
+          data-playOnRoleover="#maintanceButton",
+          data-playOnRollOff="#maintanceButton"
+          data-animation='[
+                            { 
+                              "type": "slideInDown fadeIn",
+                              "duration": 0.5                
+                            },
+                            { 
+                              "type": "slideOutUp fadeOut",
+                              "duration": 0.5,
+                              "eFunction": "lastAnimation|#maintanceButton"
+                            }
+                          ]'>
+          <p>Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+
+        </div>
+
+      </div>
+      
+    </div>
+
 
   </div>
 
@@ -67,7 +103,7 @@
   function lastAnimation(el_id)
   {
     console.log("element_id: " + el_id);
-    course.elementViewed("#emplyeeCentralButton");
+    course.elementViewed(el_id);
 
   }
 

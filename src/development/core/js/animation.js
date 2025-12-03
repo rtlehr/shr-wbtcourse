@@ -628,12 +628,31 @@ class Animation {
     }
 
     _callHookIfExists(fnName) {
-        const fn = (typeof window !== 'undefined') ? window[fnName] : undefined;
+        if (!fnName) return;
+
+        let fn = null;
+        let args = [];
+
+        // Check if there is a "|" meaning multiple parts
+        if (fnName.includes("|")) {
+            // Split into array
+            const parts = fnName.split("|").map(s => s.trim());
+
+            const fnString = parts.shift(); // first item = function name
+            args = parts;                   // remaining = arguments
+
+            fn = (typeof window !== 'undefined') ? window[fnString] : undefined;
+        } 
+        else {
+            // No args case
+            fn = (typeof window !== 'undefined') ? window[fnName] : undefined;
+        }
+
         if (typeof fn === 'function') {
             try {
-                fn(this.el_id);
+                fn(...args);   // spread supports 0, 1, or many arguments
             } catch (e) {
-                console.error('Error in ' + fnName + '(' + this.el_id + ')', e);
+                console.error(`Error in ${fnName}`, e);
             }
         }
     }
