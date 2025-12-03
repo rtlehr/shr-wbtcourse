@@ -98,7 +98,7 @@ class Animation {
             });
 
             // 5) OPTIONAL: wire data-playbutton to trigger animation
-            const playButton = $el.attr("data-playbutton");
+            const playButton = $el.attr("data-playOnClick");
             if (playButton && !$el.data("playBound")) {
                 $(playButton).on("click", () => {
                     this.playAnimation($el);
@@ -108,7 +108,7 @@ class Animation {
             }
 
             // 5b) OPTIONAL: wire data-playRoleoverPlay for rollover (hover/focus)
-            const rolloverSel = $el.attr("data-playRoleover");
+            const rolloverSel = $el.attr("data-playOnRoleover");
             if (rolloverSel && !$el.data("rolloverBound")) {
             $(rolloverSel).on("mouseenter focusin", () => {
                 this.playAnimation($el);
@@ -118,7 +118,7 @@ class Animation {
             }
 
             // 5c) OPTIONAL: wire data-rollOffPlay for rolloff (leave/blur)
-            const rollOffSel = $el.attr("data-playRollOff");
+            const rollOffSel = $el.attr("data-playOnRollOff");
             if (rollOffSel && !$el.data("rollOffBound")) {
             $(rollOffSel).on("mouseleave focusout", () => {
                 this.playAnimation($el);
@@ -631,9 +631,9 @@ class Animation {
         const fn = (typeof window !== 'undefined') ? window[fnName] : undefined;
         if (typeof fn === 'function') {
             try {
-                fn();
+                fn(this.el_id);
             } catch (e) {
-                console.error('Error in ' + fnName + '()', e);
+                console.error('Error in ' + fnName + '(' + this.el_id + ')', e);
             }
         }
     }

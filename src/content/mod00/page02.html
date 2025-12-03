@@ -17,8 +17,8 @@
 
         <div id="emplyeeCentralText" class="animateMe" style="background-color: yellow; width: 300px; height: 150px;"
           data-animationpane="#textToShowParent"
-          data-playRoleover="#emplyeeCentralButton",
-          data-playRollOff="#emplyeeCentralButton"
+          data-playOnRoleover="#emplyeeCentralButton",
+          data-playOnRollOff="#emplyeeCentralButton"
           data-animation='[
                             { 
                               "type": "slideInDown fadeIn",
@@ -64,8 +64,11 @@
 
   }
 
-  function lastAnimation()
+  function lastAnimation(el_id)
   {
+    console.log("element_id: " + el_id);
     course.elementViewed("#emplyeeCentralButton");
+
   }
+
 </script>
