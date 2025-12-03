@@ -98,12 +98,33 @@ class Animation {
             });
 
             // 5) OPTIONAL: wire data-playbutton to trigger animation
-            const playSel = $el.attr("data-playbutton");
-            if (playSel && !$el.data("playBound")) {
-                $(playSel).on("click", () => {
+            const playButton = $el.attr("data-playbutton");
+            if (playButton && !$el.data("playBound")) {
+                $(playButton).on("click", () => {
                     this.playAnimation($el);
+                    $(playSel).toggleClass("playButtonClicked");
                 });
                 $el.data("playBound", true);
+            }
+
+            // 5b) OPTIONAL: wire data-playRoleoverPlay for rollover (hover/focus)
+            const rolloverSel = $el.attr("data-playRoleover");
+            if (rolloverSel && !$el.data("rolloverBound")) {
+            $(rolloverSel).on("mouseenter focusin", () => {
+                this.playAnimation($el);
+                $(rolloverSel).addClass("playRollOver");
+            });
+            $el.data("rolloverBound", true);
+            }
+
+            // 5c) OPTIONAL: wire data-rollOffPlay for rolloff (leave/blur)
+            const rollOffSel = $el.attr("data-playRollOff");
+            if (rollOffSel && !$el.data("rollOffBound")) {
+            $(rollOffSel).on("mouseleave focusout", () => {
+                this.playAnimation($el);
+                $(rollOffSel).removeClass("playRollOver");
+            });
+            $el.data("rollOffBound", true);
             }
 
             // A11y: if we start fully hidden, mark as aria-hidden

@@ -6,25 +6,37 @@
 
   <h1 id="l1-title">About Our Resort</h1>
 
-  <div id="showText" class="notViewed" style="background-color: brown; width: 50px; height: 50px;"></div>
+  <img src="/src/content/images/resortMap.png" style="position: absolute; left: 0px;"/>
 
-  <div id="textToShowParent" style="width: 300px; height: 150px; overflow: hidden;">
+  <div id""rollOvers" style="position: absolute; top: 0px; left: 0px;">
 
-    <div id="textToShow" class="animateMe" style="background-color: yellow; width: 300px; height: 150px;"
-      data-animationpane="#textToShowParent"
-      data-playbutton="#showText"
-      data-animation='[
-                        { 
-                          "type": "slideInDown fadeIn",
-                          "duration": 0.5                
-                        },
-                        { 
-                          "type": "slideOutUp fadeOut",
-                          "duration": 0.5       
-                        }
-                      ]'>
-      <p>Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+    <div id="emplyeeCentral" style="position: relative; top: 161px; left: 350px;">
+      <div id="emplyeeCentralButton" class="notViewed" style="width: 125px; height: 110px;"></div>
+
+      <div id="textToShowParent" style="width: 300px; height: 150px; overflow: hidden;">
+
+        <div id="emplyeeCentralText" class="animateMe" style="background-color: yellow; width: 300px; height: 150px;"
+          data-animationpane="#textToShowParent"
+          data-playRoleover="#emplyeeCentralButton",
+          data-playRollOff="#emplyeeCentralButton"
+          data-animation='[
+                            { 
+                              "type": "slideInDown fadeIn",
+                              "duration": 0.5                
+                            },
+                            { 
+                              "type": "slideOutUp fadeOut",
+                              "duration": 0.5,
+                              "eFunction": "lastAnimation"
+                            }
+                          ]'>
+          <p>Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+        </div>
+      </div>
     </div>
+
+  </div>
+
 
   </div>
 
@@ -52,4 +64,8 @@
 
   }
 
+  function lastAnimation()
+  {
+    course.elementViewed("#emplyeeCentralButton");
+  }
 </script>
